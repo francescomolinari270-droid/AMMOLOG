@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AMMOLOG — Registro Munizioni & Arsenale</title>
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="AMMOLOG" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #273549;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f97316;
+      --info: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding-bottom: 48px;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .brand h1 {
+      font-size: 1.35rem;
+      letter-spacing: 0.04em;
+      line-height: 1.15;
+    }
+
+    .brand p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button, .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      padding: 9px 14px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+    }
+
+    button:hover {
+      background: #33455e;
+      border-color: #475569;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0f172a;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-success {
+      background: rgba(16, 185, 129, 0.16);
+      border-color: rgba(16, 185, 129, 0.45);
+      color: #6ee7b7;
+    }
+
+    .btn-success:hover {
+      background: rgba(16, 185, 129, 0.26);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.24);
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border-radius: 7px;
+    }
+
+    .limits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .limit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .limit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .limit-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .limit-values {
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .limit-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .progress-track {
+      height: 10px;
+      background: #0b1120;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--success);
+      transition: width 0.25s ease, background-color 0.25s ease;
+    }
+
+    .progress-fill.warn {
+      background: var(--warning);
+    }
+
+    .progress-fill.full {
+      background: var(--danger);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .tab-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    .tab-btn.active {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .section-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-top h2 {
+      font-size: 1.1rem;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.14);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      white-space: nowrap;
+    }
+
+    .badge-hunt {
+      background: rgba(16, 185, 129, 0.14);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.32);
+    }
+
+    .badge-short {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .qty-big {
+      font-size: 1.5rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .qty-big span {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .meta-list {
+      font-size: 0.84rem;
+      color: var(--muted);
+      display: grid;
+      gap: 4px;
+    }
+
+    .meta-list strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .weapon-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .weapon-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .log-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .log-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .log-main {
+      display: grid;
+      gap: 2px;
+    }
+
+    .log-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    .log-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .log-delta {
+      font-weight: 800;
+      font-size: 0.92rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .delta-minus {
+      color: #fca5a5;
+    }
+
+    .delta-plus {
+      color: #6ee7b7;
+    }
+
+    .empty-state {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.76);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .modal-header h3 {
+      font-size: 1.05rem;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 11px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .quick-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1e293b;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      padding: 11px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 200;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .helper-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <!-- Icona Fucile -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 6l-3 1.5-8.5 3.5-5.5 1-3 3 2.5 2 3.5-3 4.5-.5 2 4.5h2.5l-1.5-5.5L22 7.5z"/>
+            <path d="M12.5 10.5l1.5 2.5"/>
+          </svg>
+        </div>
+        <div>
+          <h1>AMMOLOG</h1>
+          <p>Registro munizioni, limiti legali e sessioni di tiro</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" class="btn-primary" id="btnOpenShoot">+ Registra Sessione / Spara</button>
+        <button type="button" id="btnExportJson">Esporta JSON</button>
+        <button type="button" id="btnImportJson">Importa JSON</button>
+        <input type="file" id="importFileInput" accept=".json,application/json" style="display:none" />
+        <button type="button" class="btn-danger btn-sm" id="btnResetDemo">Ripristina Base</button>
+      </div>
+    </header>
+
+    <section class="limits-grid" aria-label="Limiti di detenzione">
+      <div class="limit-card">
+        <div class="limit-header">
+          <span class="limit-title">Arma Comune / Corta (9x21)</span>
+          <span class="limit-values" id="limitShortText">0 / 200 colpi</span>
+        </div>
+        <div class="limit-sub" id="limitShortSub">Residuo disponibile: 200 colpi</div>
+        <div class="progress-track">
+          <div class="progress-fill" id="limitShortBar"></div>
+        </div>
+      </div>
+
+      <div class="limit-card">
+        <div class="limit-header">
+          <span class="limit-title">Munizioni da Caccia / Fucile (7.62x39, .30 M1, Cal. 12)</span>
+          <span class="limit-values" id="limitHuntText">0 / 1.500 colpi</span>
+        </div>
+        <div class="limit-sub" id="limitHuntSub">Residuo disponibile: 1.500 colpi cumulativi</div>
+        <div class="progress-track">
+          <div class="progress-fill" id="limitHuntBar"></div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="ammo">Magazzino Munizioni</button>
+      <button type="button" class="tab-btn" data-tab="weapons">Arsenale (4)</button>
+      <button type="button" class="tab-btn" data-tab="logs">Registro Movimenti</button>
+    </nav>
+
+    <!-- TAB 1: MUNIZIONI -->
+    <section class="tab-panel active" id="tab-ammo">
+      <div class="section-top">
+        <h2>Lotti in Detenzione</h2>
+        <button type="button" class="btn-primary btn-sm" id="btnAddLot">+ Nuovo Lotto Munizioni</button>
+      </div>
+      <div class="cards-grid" id="ammoGrid"></div>
+    </section>
+
+    <!-- TAB 2: ARSENALE -->
+    <section class="tab-panel" id="tab-weapons">
+      <div class="section-top">
+        <h2>Le Tue Armi</h2>
+        <button type="button" class="btn-sm" id="btnAddWeapon">+ Aggiungi Arma</button>
+      </div>
+      <div class="cards-grid" id="weaponsGrid"></div>
+    </section>
+
+    <!-- TAB 3: REGISTRO -->
+    <section class="tab-panel" id="tab-logs">
+      <div class="section-top">
+        <h2>Storico Carichi e Sessioni</h2>
+        <button type="button" class="btn-danger btn-sm" id="btnClearLogs">Svuota Storico</button>
+      </div>
+      <div class="log-list" id="logsList"></div>
+    </section>
+  </div>
+
+  <!-- MODALE: REGISTRA SESSIONE / SPARA -->
+  <div class="modal-backdrop" id="shootModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Registra Sessione di Tiro</h3>
+        <button type="button" class="btn-sm" data-close="shootModal">✕</button>
+      </div>
+      <form id="shootForm">
+        <div class="form-group">
+          <label for="shootWeapon">Arma utilizzata</label>
+          <select id="shootWeapon" required></select>
+        </div>
+        <div class="form-group">
+          <label for="shootLot">Lotto munizioni (calibro compatibile)</label>
+          <select id="shootLot" required></select>
+        </div>
+        <div class="form-group">
+          <label for="shootQty">Colpi sparati</label>
+          <input type="number" id="shootQty" min="1" step="1" value="50" required />
+          <div class="quick-row">
+            <button type="button" class="btn-sm" data-shoot-quick="10">+10</button>
+            <button type="button" class="btn-sm" data-shoot-quick="25">+25</button>
+            <button type="button" class="btn-sm" data-shoot-quick="50">+50</button>
+            <button type="button" class="btn-sm" data-shoot-quick="100">+100</button>
+            <button type="button" class="btn-sm" id="btnShootMax">MAX LOTTO</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="shootNote">Note (poligono, bersaglio, cronografo...)</label>
+          <input type="text" id="shootNote" placeholder="Es. Poligono Mantova - 100m" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" data-close="shootModal">Annulla</button>
+          <button type="submit" class="btn-primary">Conferma Scarico</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE: CARICA / SCARICA SINGOLO LOTTO -->
+  <div class="modal-backdrop" id="adjustModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="adjustTitle">Aggiorna Lotto</h3>
+        <button type="button" class="btn-sm" data-close="adjustModal">✕</button>
+      </div>
+      <form id="adjustForm">
+        <input type="hidden" id="adjustLotId" />
+        <input type="hidden" id="adjustMode" />
+        <p class="helper-note" id="adjustInfo" style="margin-bottom:10px;"></p>
+        <div class="form-group">
+          <label for="adjustQty">Numero di colpi</label>
+          <input type="number" id="adjustQty" min="1" step="1" required />
+          <div class="quick-row" id="adjustQuickRow"></div>
+        </div>
+        <div class="form-group">
+          <label for="adjustNote">Causale / Note</label>
+          <input type="text" id="adjustNote" placeholder="Es. Acquisto armeria / sessione tiro" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" data-close="adjustModal">Annulla</button>
+          <button type="submit" class="btn-primary" id="adjustSubmitBtn">Salva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE: NUOVO LOTTO -->
+  <div class="modal-backdrop" id="newLotModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Nuovo Lotto Munizioni</h3>
+        <button type="button" class="btn-sm" data-close="newLotModal">✕</button>
+      </div>
+      <form id="newLotForm">
+        <div class="form-group">
+          <label for="lotCaliber">Calibro e Categoria Legale</label>
+          <select id="lotCaliber" required>
+            <option value="7.62x39" data-cat="hunt">7.62x39mm — Caccia / Fucile (limite 1.500)</option>
+            <option value="9x21" data-cat="short">9x21mm — Arma Comune (limite 200)</option>
+            <option value=".30 M1" data-cat="hunt">.30 M1 Carbine — Caccia / Fucile (limite 1.500)</option>
+            <option value="Calibro 12" data-cat="hunt">Calibro 12 — Caccia / Fucile (limite 1.500)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="lotBrand">Marca / Caricamento / Palla</label>
+          <input type="text" id="lotBrand" placeholder="Es. Barnaul 123 gr FMJ" required />
+        </div>
+        <div class="form-group">
+          <label for="lotQty">Quantità iniziale (colpi)</label>
+          <input type="number" id="lotQty" min="1" step="1" value="50" required />
+          <div class="helper-note" id="lotLegalHint"></div>
+        </div>
+        <div class="form-group">
+          <label for="lotMinAlert">Soglia avviso scorta bassa</label>
+          <input type="number" id="lotMinAlert" min="0" step="1" value="50" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" data-close="newLotModal">Annulla</button>
+          <button type="submit" class="btn-primary">Crea Lotto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE: NUOVA ARMA -->
+  <div class="modal-backdrop" id="newWeaponModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Aggiungi Arma all'Arsenale</h3>
+        <button type="button" class="btn-sm" data-close="newWeaponModal">✕</button>
+      </div>
+      <form id="newWeaponForm">
+        <div class="form-group">
+          <label for="weaponName">Nome / Modello</label>
+          <input type="text" id="weaponName" placeholder="Es. Beretta 92FS" required />
+        </div>
+        <div class="form-group">
+          <label for="weaponCaliber">Calibro</label>
+          <select id="weaponCaliber" required>
+            <option value="7.62x39">7.62x39</option>
+            <option value="9x21">9x21</option>
+            <option value=".30 M1">.30 M1</option>
+            <option value="Calibro 12">Calibro 12</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="weaponType">Tipologia icona</label>
+          <select id="weaponType">
+            <option value="rifle">Fucile / Carabina</option>
+            <option value="pistol">Pistola</option>
+            <option value="shotgun">Fucile da caccia (Cal. 12)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="weaponCleanInterval">Intervallo pulizia (colpi)</label>
+          <input type="number" id="weaponCleanInterval" min="20" step="10" value="150" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" data-close="newWeaponModal">Annulla</button>
+          <button type="submit" class="btn-primary">Salva Arma</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = "ammolog_v3_data";
+      const LIMIT_SHORT = 200;   // 9x21 arma comune
+      const LIMIT_HUNT = 1500;   // 7.62x39 + .30 M1 + Calibro 12 da caccia
+
+      function getCategoryForCaliber(caliber) {
+        return caliber === "9x21" ? "short" : "hunt";
+      }
+
+      function getDefaultState() {
+        return {
+          weapons: [
+            {
+              id: "w-ak47",
+              name: "Ak-47 spetsnaz",
+              caliber: "7.62x39",
+              type: "rifle",
+              totalFired: 0,
+              shotsSinceClean: 0,
+              cleanInterval: 200
+            },
+            {
+              id: "w-p38",
+              name: "P38",
+              caliber: "9x21",
+              type: "pistol",
+              totalFired: 0,
+              shotsSinceClean: 0,
+              cleanInterval: 150
+            },
+            {
+              id: "w-m1",
+              name: "M1 carabine",
+              caliber: ".30 M1",
+              type: "rifle",
+              totalFired: 0,
+              shotsSinceClean: 0,
+              cleanInterval: 150
+            },
+            {
+              id: "w-breda",
+              name: "Breda Vega lusso",
+              caliber: "Calibro 12",
+              type: "shotgun",
+              totalFired: 0,
+              shotsSinceClean: 0,
+              cleanInterval: 100
+            }
+          ],
+          lots: [
+            {
+              id: "l-762-1",
+              caliber: "7.62x39",
+              brand: "Standard 123 gr FMJ",
+              quantity: 200,
+              minAlert: 50
+            },
+            {
+              id: "l-9x21-1",
+              caliber: "9x21",
+              brand: "Commerciale 124 gr FMJ",
+              quantity: 100,
+              minAlert: 30
+            },
+            {
+              id: "l-30m1-1",
+              caliber: ".30 M1",
+              brand: "110 gr RN",
+              quantity: 100,
+              minAlert: 30
+            },
+            {
+              id: "l-cal12-1",
+              caliber: "Calibro 12",
+              brand: "Cartucce Caccia / Tiro",
+              quantity: 150,
+              minAlert: 40
+            }
+          ],
+          logs: [
+            {
+              id: "log-init",
+              timestamp: new Date().toISOString(),
+              title: "Inizializzazione magazzino",
+              detail: "Caricati i lotti iniziali e il profilo delle 4 armi",
+              delta: 0
+            }
+          ]
+        };
+      }
+
+      let state = loadState();
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            const initial = getDefaultState();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+            return initial;
+          }
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed.weapons) || !Array.isArray(parsed.lots)) {
+            throw new Error("Struttura non valida");
+          }
+          return {
+            weapons: parsed.weapons,
+            lots: parsed.lots,
+            logs: Array.isArray(parsed.logs) ? parsed.logs : []
+          };
+        } catch (err) {
+          const fallback = getDefaultState();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(fallback));
+          return fallback;
+        }
+      }
+
+      function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById("toast");
+        toast.textContent = msg;
+        toast.classList.add("show");
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2800);
+      }
+
+      function addLog(title, detail, delta) {
+        state.logs.unshift({
+          id: "log-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+          timestamp: new Date().toISOString(),
+          title,
+          detail,
+          delta
+        });
+        if (state.logs.length > 200) {
+          state.logs.length = 200;
+        }
+      }
+
+      function getCategoryTotals() {
+        let shortTotal = 0;
+        let huntTotal = 0;
+        for (const lot of state.lots) {
+          const qty = Number(lot.quantity) || 0;
+          if (getCategoryForCaliber(lot.caliber) === "short") {
+            shortTotal += qty;
+          } else {
+            huntTotal += qty;
+          }
+        }
+        return { shortTotal, huntTotal };
+      }
+
+      function getRemainingCapacity(caliber) {
+        const { shortTotal, huntTotal } = getCategoryTotals();
+        if (getCategoryForCaliber(caliber) === "short") {
+          return Math.max(0, LIMIT_SHORT - shortTotal);
+        }
+        return Math.max(0, LIMIT_HUNT - huntTotal);
+      }
+
+      function getWeaponIconSvg(type) {
+        if (type === "pistol") {
+          return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h19v4h-6l-2 7H8l1.5-7H2z"/><path d="M15 8V6h4v2"/></svg>`;
+        }
+        if (type === "shotgun") {
+          return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-11 3.5-5 1-3 3 2 1.8 3.2-2.6 5.3-.5L22 8.5z"/><path d="M11 10.5l7 2.5"/></svg>`;
+        }
+        return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6l-3 1.5-8.5 3.5-5.5 1-3 3 2.5 2 3.5-3 4.5-.5 2 4.5h2.5l-1.5-5.5L22 7.5z"/></svg>`;
+      }
+
+      function renderLimits() {
+        const { shortTotal, huntTotal } = getCategoryTotals();
+
+        const shortPct = Math.min(100, (shortTotal / LIMIT_SHORT) * 100);
+        const shortRem = Math.max(0, LIMIT_SHORT - shortTotal);
+        document.getElementById("limitShortText").textContent = `${shortTotal.toLocaleString("it-IT")} / ${LIMIT_SHORT} colpi`;
+        document.getElementById("limitShortSub").textContent = `Residuo disponibile: ${shortRem.toLocaleString("it-IT")} colpi`;
+        const shortBar = document.getElementById("limitShortBar");
+        shortBar.style.width = `${shortPct}%`;
+        shortBar.className = "progress-fill" + (shortPct >= 100 ? " full" : shortPct >= 80 ? " warn" : "");
+
+        const huntPct = Math.min(100, (huntTotal / LIMIT_HUNT) * 100);
+        const huntRem = Math.max(0, LIMIT_HUNT - huntTotal);
+        document.getElementById("limitHuntText").textContent = `${huntTotal.toLocaleString("it-IT")} / ${LIMIT_HUNT.toLocaleString("it-IT")} colpi`;
+        document.getElementById("limitHuntSub").textContent = `Residuo disponibile: ${huntRem.toLocaleString("it-IT")} colpi cumulativi`;
+        const huntBar = document.getElementById("limitHuntBar");
+        huntBar.style.width = `${huntPct}%`;
+        huntBar.className = "progress-fill" + (huntPct >= 100 ? " full" : huntPct >= 80 ? " warn" : "");
+      }
+
+      function renderAmmo() {
+        const grid = document.getElementById("ammoGrid");
+        if (!state.lots.length) {
+          grid.innerHTML = `<div class="empty-state">Nessun lotto presente. Clicca su <strong>+ Nuovo Lotto Munizioni</strong> per aggiungerne uno.</div>`;
+          return;
+        }
+
+        grid.innerHTML = state.lots.map((lot) => {
+          const isShort = getCategoryForCaliber(lot.caliber) === "short";
+          const remCap = getRemainingCapacity(lot.caliber);
+          const lowStock = lot.quantity <= (Number(lot.minAlert) || 0);
+          return `
+            <article class="card">
+              <div>
+                <div class="card-top">
+                  <div>
+                    <span class="badge ${isShort ? "badge-short" : "badge-hunt"}">${isShort ? "Arma Comune (Max 200)" : "Caccia / Fucile (Max 1.500)"}</span>
+                    <h3 style="margin-top:8px;font-size:1.05rem;">${escapeHtml(lot.caliber)} — ${escapeHtml(lot.brand)}</h3>
+                  </div>
+                  <div class="qty-big">${Number(lot.quantity).toLocaleString("it-IT")} <span>colpi</span></div>
+                </div>
+                <div class="meta-list" style="margin-top:10px;">
+                  <div><strong>Soglia avviso:</strong> ${lot.minAlert} colpi ${lowStock ? '<span style="color:#fb923c;font-weight:700;">(Scorta bassa)</span>' : ""}</div>
+                  <div><strong>Margine legale categoria:</strong> +${remCap.toLocaleString("it-IT")} colpi caricabili</div>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button type="button" class="btn-success btn-sm" data-action="load" data-id="${lot.id}" ${remCap <= 0 ? "disabled" : ""}>+ Carica</button>
+                <button type="button" class="btn-sm" data-action="unload" data-id="${lot.id}" ${lot.quantity <= 0 ? "disabled" : ""}>- Scarica</button>
+                <button type="button" class="btn-danger btn-sm" data-action="delete-lot" data-id="${lot.id}">Elimina</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      function renderWeapons() {
+        const grid = document.getElementById("weaponsGrid");
+        document.querySelector('[data-tab="weapons"]').textContent = `Arsenale (${state.weapons.length})`;
+
+        if (!state.weapons.length) {
+          grid.innerHTML = `<div class="empty-state">Nessuna arma inserita.</div>`;
+          return;
+        }
+
+        grid.innerHTML = state.weapons.map((w) => {
+          const interval = Number(w.cleanInterval) || 150;
+          const sinceClean = Number(w.shotsSinceClean) || 0;
+          const pct = Math.min(100, (sinceClean / interval) * 100);
+          const needsClean = sinceClean >= interval;
+
+          return `
+            <article class="card">
+              <div>
+                <div class="card-top">
+                  <div class="weapon-title-wrap">
+                    <div class="weapon-icon">${getWeaponIconSvg(w.type)}</div>
+                    <div>
+                      <h3 style="font-size:1.05rem;">${escapeHtml(w.name)}</h3>
+                      <span class="badge" style="margin-top:4px;">Calibro ${escapeHtml(w.caliber)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="meta-list" style="margin-top:12px;">
+                  <div><strong>Colpi sparati totali:</strong> ${Number(w.totalFired || 0).toLocaleString("it-IT")}</div>
+                  <div><strong>Dall'ultima pulizia:</strong> ${sinceClean} / ${interval} colpi ${needsClean ? '<span style="color:#f87171;font-weight:700;">(Pulizia consigliata)</span>' : ""}</div>
+                </div>
+                <div class="progress-track" style="margin-top:8px;">
+                  <div class="progress-fill ${needsClean ? "full" : pct >= 75 ? "warn" : ""}" style="width:${pct}%"></div>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button type="button" class="btn-primary btn-sm" data-action="shoot-weapon" data-id="${w.id}">Spara</button>
+                <button type="button" class="btn-success btn-sm" data-action="clean-weapon" data-id="${w.id}">Segna Pulita</button>
+                <button type="button" class="btn-danger btn-sm" data-action="delete-weapon" data-id="${w.id}">Rimuovi</button>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      function renderLogs() {
+        const list = document.getElementById("logsList");
+        if (!state.logs.length) {
+          list.innerHTML = `<div class="empty-state">Nessun movimento registrato.</div>`;
+          return;
+        }
+
+        list.innerHTML = state.logs.map((entry) => {
+          const dt = new Date(entry.timestamp);
+          const formattedDate = isNaN(dt.getTime())
+            ? ""
+            : dt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" }) +
+              " " +
+              dt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+
+          const deltaNum = Number(entry.delta) || 0;
+          let deltaHtml = "";
+          if (deltaNum < 0) {
+            deltaHtml = `<div class="log-delta delta-minus">${deltaNum.toLocaleString("it-IT")} colpi</div>`;
+          } else if (deltaNum > 0) {
+            deltaHtml = `<div class="log-delta delta-plus">+${deltaNum.toLocaleString("it-IT")} colpi</div>`;
+          }
+
+          return `
+            <div class="log-item">
+              <div class="log-main">
+                <div class="log-title">${escapeHtml(entry.title)}</div>
+                <div class="log-sub">${escapeHtml(entry.detail)}${formattedDate ? " • " + formattedDate : ""}</div>
+              </div>
+              ${deltaHtml}
+            </div>
+          `;
+        }).join("");
+      }
+
+      function renderAll() {
+        renderLimits();
+        renderAmmo();
+        renderWeapons();
+        renderLogs();
+      }
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&")
+          .replace(/</g, "<")
+          .replace(/>/g, ">")
+          .replace(/"/g, """);
+      }
+
+      function openModal(id) {
+        document.getElementById(id).classList.add("open");
+      }
+
+      function closeModal(id) {
+        document.getElementById(id).classList.remove("open");
+      }
+
+      function populateShootModal(preselectedWeaponId) {
+        const weaponSelect = document.getElementById("shootWeapon");
+        if (!state.weapons.length) {
+          showToast("Aggiungi prima un'arma all'arsenale.");
+          return;
+        }
+
+        weaponSelect.innerHTML = state.weapons
+          .map((w) => `<option value="${w.id}">${escapeHtml(w.name)} (${escapeHtml(w.caliber)})</option>`)
+          .join("");
+
+        if (preselectedWeaponId && state.weapons.some((w) => w.id === preselectedWeaponId)) {
+          weaponSelect.value = preselectedWeaponId;
+        }
+
+        updateShootLotsForSelectedWeapon();
+        openModal("shootModal");
+      }
+
+      function updateShootLotsForSelectedWeapon() {
+        const weaponId = document.getElementById("shootWeapon").value;
+        const weapon = state.weapons.find((w) => w.id === weaponId);
+        const lotSelect = document.getElementById("shootLot");
+
+        if (!weapon) {
+          lotSelect.innerHTML = `<option value="">Nessuna arma</option>`;
+          return;
+        }
+
+        const compatibleLots = state.lots.filter((l) => l.caliber === weapon.caliber && Number(l.quantity) > 0);
+        if (!compatibleLots.length) {
+          lotSelect.innerHTML = `<option value="">Nessun lotto disponibile per ${escapeHtml(weapon.caliber)}</option>`;
+          return;
+        }
+
+        lotSelect.innerHTML = compatibleLots
+          .map((l) => `<option value="${l.id}">${escapeHtml(l.brand)} — ${Number(l.quantity)} colpi disp.</option>`)
+          .join("");
+      }
+
+      function openAdjustModal(lotId, mode) {
+        const lot = state.lots.find((l) => l.id === lotId);
+        if (!lot) return;
+
+        const remCap = getRemainingCapacity(lot.caliber);
+        const isLoad = mode === "load";
+
+        document.getElementById("adjustLotId").value = lot.id;
+        document.getElementById("adjustMode").value = mode;
+        document.getElementById("adjustTitle").textContent = isLoad
+          ? `Carica lotto — ${lot.caliber} (${lot.brand})`
+          : `Scarica lotto — ${lot.caliber} (${lot.brand})`;
+
+        document.getElementById("adjustInfo").textContent = isLoad
+          ? `Disponibilità attuale: ${lot.quantity} colpi. Margine legale residuo: ${remCap} colpi.`
+          : `Disponibilità attuale nel lotto: ${lot.quantity} colpi.`;
+
+        const qtyInput = document.getElementById("adjustQty");
+        const quickRow = document.getElementById("adjustQuickRow");
+
+        if (isLoad) {
+          qtyInput.max = remCap;
+          qtyInput.value = Math.min(50, remCap) || 1;
+          quickRow.innerHTML = `
+            <button type="button" class="btn-sm" data-adj-quick="20">+20</button>
+            <button type="button" class="btn-sm" data-adj-quick="50">+50</button>
+            <button type="button" class="btn-sm" data-adj-quick="100">+100</button>
+            <button type="button" class="btn-sm" data-adj-quick="${remCap}">MAX LEGGE (${remCap})</button>
+          `;
+        } else {
+          qtyInput.max = lot.quantity;
+          qtyInput.value = Math.min(20, lot.quantity) || 1;
+          quickRow.innerHTML = `
+            <button type="button" class="btn-sm" data-adj-quick="10">-10</button>
+            <button type="button" class="btn-sm" data-adj-quick="25">-25</button>
+            <button type="button" class="btn-sm" data-adj-quick="50">-50</button>
+            <button type="button" class="btn-sm" data-adj-quick="${lot.quantity}">TUTTI (${lot.quantity})</button>
+          `;
+        }
+
+        document.getElementById("adjustNote").value = "";
+        openModal("adjustModal");
+      }
+
+      function updateNewLotLegalHint() {
+        const caliber = document.getElementById("lotCaliber").value;
+        const rem = getRemainingCapacity(caliber);
+        const catLabel = getCategoryForCaliber(caliber) === "short" ? "Arma Comune (Max 200)" : "Caccia / Fucile (Max 1.500)";
+        document.getElementById("lotLegalHint").textContent =
+          `Categoria: ${catLabel} • Margine caricabile disponibile: ${rem.toLocaleString("it-IT")} colpi`;
+      }
+
+      // Event listeners statici
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = btn.getAttribute("data-tab");
+          document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+          btn.classList.add("active");
+          document.getElementById("tab-" + target).classList.add("active");
+        });
+      });
+
+      document.querySelectorAll("[data-close]").forEach((btn) => {
+        btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close")));
+      });
+
+      document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+        backdrop.addEventListener("click", (e) => {
+          if (e.target === backdrop) {
+            backdrop.classList.remove("open");
+          }
+        });
+      });
+
+      document.getElementById("btnOpenShoot").addEventListener("click", () => populateShootModal(null));
+      document.getElementById("shootWeapon").addEventListener("change", updateShootLotsForSelectedWeapon);
+
+      document.querySelectorAll("[data-shoot-quick]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const addVal = Number(btn.getAttribute("data-shoot-quick")) || 0;
+          const qtyInput = document.getElementById("shootQty");
+          qtyInput.value = (Number(qtyInput.value) || 0) + addVal;
+        });
+      });
+
+      document.getElementById("btnShootMax").addEventListener("click", () => {
+        const lotId = document.getElementById("shootLot").value;
+        const lot = state.lots.find((l) => l.id === lotId);
+        if (lot) {
+          document.getElementById("shootQty").value = Number(lot.quantity) || 0;
+        }
+      });
+
+      document.getElementById("shootForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const weaponId = document.getElementById("shootWeapon").value;
+        const lotId = document.getElementById("shootLot").value;
+        const qty = parseInt(document.getElementById("shootQty").value, 10);
+        const note = document.getElementById("shootNote").value.trim();
+
+        const weapon = state.weapons.find((w) => w.id === weaponId);
+        const lot = state.lots.find((l) => l.id === lotId);
+
+        if (!weapon || !lot) {
+          showToast("Seleziona un'arma e un lotto valido.");
+          return;
+        }
+        if (!Number.isFinite(qty) || qty <= 0) {
+          showToast("Inserisci un numero di colpi valido.");
+          return;
+        }
+        if (qty > lot.quantity) {
+          showToast(`Colpi insufficienti nel lotto (disponibili: ${lot.quantity}).`);
+          return;
+        }
+
+        lot.quantity -= qty;
+        weapon.totalFired = (Number(weapon.totalFired) || 0) + qty;
+        weapon.shotsSinceClean = (Number(weapon.shotsSinceClean) || 0) + qty;
+
+        addLog(
+          `Sessione con ${weapon.name}`,
+          `Lotto ${lot.caliber} ${lot.brand}${note ? " — " + note : ""}`,
+          -qty
+        );
+
+        saveState();
+        renderAll();
+        closeModal("shootModal");
+        showToast(`Scaricati ${qty} colpi (${weapon.name}).`);
+      });
+
+      document.getElementById("adjustQuickRow").addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-adj-quick]");
+        if (!btn) return;
+        const val = parseInt(btn.getAttribute("data-adj-quick"), 10);
+        if (Number.isFinite(val) && val > 0) {
+          document.getElementById("adjustQty").value = val;
+        }
+      });
+
+      document.getElementById("adjustForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const lotId = document.getElementById("adjustLotId").value;
+        const mode = document.getElementById("adjustMode").value;
+        const qty = parseInt(document.getElementById("adjustQty").value, 10);
+        const note = document.getElementById("adjustNote").value.trim();
+
+        const lot = state.lots.find((l) => l.id === lotId);
+        if (!lot || !Number.isFinite(qty) || qty <= 0) return;
+
+        if (mode === "load") {
+          const remCap = getRemainingCapacity(lot.caliber);
+          if (qty > remCap) {
+            showToast(`Limite legale superato! Massimo caricabile: ${remCap} colpi.`);
+            return;
+          }
+          lot.quantity += qty;
+          addLog(`Carico lotto ${lot.caliber}`, `${lot.brand}${note ? " — " + note : ""}`, qty);
+          showToast(`Aggiunti ${qty} colpi al lotto ${lot.caliber}.`);
+        } else {
+          if (qty > lot.quantity) {
+            showToast(`Quantità superiore alla giacenza (${lot.quantity} colpi).`);
+            return;
+          }
+          lot.quantity -= qty;
+          addLog(`Scarico lotto ${lot.caliber}`, `${lot.brand}${note ? " — " + note : ""}`, -qty);
+          showToast(`Scaricati ${qty} colpi dal lotto ${lot.caliber}.`);
+        }
+
+        saveState();
+        renderAll();
+        closeModal("adjustModal");
+      });
+
+      document.getElementById("btnAddLot").addEventListener("click", () => {
+        updateNewLotLegalHint();
+        const cal = document.getElementById("lotCaliber").value;
+        const rem = getRemainingCapacity(cal);
+        document.getElementById("lotQty").value = Math.min(50, rem) || 1;
+        document.getElementById("lotBrand").value = "";
+        openModal("newLotModal");
+      });
+
+      document.getElementById("lotCaliber").addEventListener("change", updateNewLotLegalHint);
+
+      document.getElementById("newLotForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const caliber = document.getElementById("lotCaliber").value;
+        const brand = document.getElementById("lotBrand").value.trim();
+        const qty = parseInt(document.getElementById("lotQty").value, 10);
+        const minAlert = parseInt(document.getElementById("lotMinAlert").value, 10) || 0;
+
+        if (!brand || !Number.isFinite(qty) || qty <= 0) return;
+
+        const remCap = getRemainingCapacity(caliber);
+        if (qty > remCap) {
+          showToast(`Supera il limite legale della categoria! Residuo: ${remCap} colpi.`);
+          return;
+        }
+
+        state.lots.push({
+          id: "lot-" + Date.now(),
+          caliber,
+          brand,
+          quantity: qty,
+          minAlert
+        });
+
+        addLog(`Nuovo lotto ${caliber}`, `${brand} (scorta iniziale)`, qty);
+        saveState();
+        renderAll();
+        closeModal("newLotModal");
+        showToast("Nuovo lotto aggiunto.");
+      });
+
+      document.getElementById("btnAddWeapon").addEventListener("click", () => {
+        document.getElementById("weaponName").value = "";
+        openModal("newWeaponModal");
+      });
+
+      document.getElementById("newWeaponForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("weaponName").value.trim();
+        const caliber = document.getElementById("weaponCaliber").value;
+        const type = document.getElementById("weaponType").value;
+        const cleanInterval = parseInt(document.getElementById("weaponCleanInterval").value, 10) || 150;
+
+        if (!name) return;
+
+        state.weapons.push({
+          id: "w-" + Date.now(),
+          name,
+          caliber,
+          type,
+          totalFired: 0,
+          shotsSinceClean: 0,
+          cleanInterval
+        });
+
+        addLog("Nuova arma in arsenale", `${name} (${caliber})`, 0);
+        saveState();
+        renderAll();
+        closeModal("newWeaponModal");
+        showToast("Arma aggiunta all'arsenale.");
+      });
+
+      // Delegazione pulsanti schede munizioni
+      document.getElementById("ammoGrid").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn) return;
+        const action = btn.getAttribute("data-action");
+        const id = btn.getAttribute("data-id");
+
+        if (action === "load" || action === "unload") {
+          openAdjustModal(id, action);
+        } else if (action === "delete-lot") {
+          state.lots = state.lots.filter((l) => l.id !== id);
+          saveState();
+          renderAll();
+          showToast("Lotto rimosso.");
+        }
+      });
+
+      // Delegazione pulsanti schede armi
+      document.getElementById("weaponsGrid").addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn) return;
+        const action = btn.getAttribute("data-action");
+        const id = btn.getAttribute("data-id");
+        const weapon = state.weapons.find((w) => w.id === id);
+
+        if (action === "shoot-weapon") {
+          populateShootModal(id);
+        } else if (action === "clean-weapon" && weapon) {
+          weapon.shotsSinceClean = 0;
+          addLog("Pulizia arma effettuata", weapon.name, 0);
+          saveState();
+          renderWeapons();
+          renderLogs();
+          showToast(`${weapon.name} segnata come pulita.`);
+        } else if (action === "delete-weapon") {
+          state.weapons = state.weapons.filter((w) => w.id !== id);
+          saveState();
+          renderWeapons();
+          showToast("Arma rimossa dall'arsenale.");
+        }
+      });
+
+      document.getElementById("btnClearLogs").addEventListener("click", () => {
+        state.logs = [];
+        saveState();
+        renderLogs();
+        showToast("Storico svuotato.");
+      });
+
+      document.getElementById("btnExportJson").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `ammolog_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("Backup JSON esportato.");
+      });
+
+      const importInput = document.getElementById("importFileInput");
+      document.getElementById("btnImportJson").addEventListener("click", () => importInput.click());
+
+      importInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const data = JSON.parse(reader.result);
+            if (!Array.isArray(data.weapons) || !Array.isArray(data.lots)) {
+              throw new Error("Formato non valido");
+            }
+            state = {
+              weapons: data.weapons,
+              lots: data.lots,
+              logs: Array.isArray(data.logs) ? data.logs : []
+            };
+            saveState();
+            renderAll();
+            showToast("Backup ripristinato.");
+          } catch (err) {
+            showToast("File JSON non valido.");
+          }
+          importInput.value = "";
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("btnResetDemo").addEventListener("click", () => {
+        state = getDefaultState();
+        saveState();
+        renderAll();
+        showToast("Dati base ripristinati.");
+      });
+
+      // Setup PWA (Manifest dinamico + Service Worker su protocolli http/https)
+      function setupPwa() {
+        try {
+          const manifestData = {
+            name: "AMMOLOG",
+            short_name: "AMMOLOG",
+            start_url: ".",
+            display: "standalone",
+            background_color: "#0f172a",
+            theme_color: "#0f172a"
+          };
+          const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: "application/manifest+json" });
+          const manifestUrl = URL.createObjectURL(manifestBlob);
+          const link = document.createElement("link");
+          link.rel = "manifest";
+          link.href = manifestUrl;
+          document.head.appendChild(link);
+        } catch (_) {}
+
+        if ("serviceWorker" in navigator && (window.location.protocol === "https:" || window.location.hostname === "localhost")) {
+          const swCode = `
+            const CACHE_NAME = "ammolog-cache-v1";
+            self.addEventListener("install", (event) => {
+              event.waitUntil(
+                caches.open(CACHE_NAME).then((cache) => cache.addAll([self.registration.scope]))
+              );
+              self.skipWaiting();
+            });
+            self.addEventListener("fetch", (event) => {
+              if (event.request.method !== "GET") return;
+              event.respondWith(
+                caches.match(event.request).then((cached) => cached || fetch(event.request))
+              );
+            });
+          `;
+          const swBlob = new Blob([swCode], { type: "application/javascript" });
+          const swUrl = URL.createObjectURL(swBlob);
+          navigator.serviceWorker.register(swUrl).catch(() => {});
+        }
+      }
+
+      setupPwa();
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
